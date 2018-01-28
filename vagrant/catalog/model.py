@@ -3,7 +3,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
 
-
 Base = declarative_base()
 
 # Need a table of users
@@ -67,8 +66,8 @@ class Stuff(Base):
                 'name'          : self.name,
                 'description'   : self.description,
                 'category_id'   : self.category_id,
-                'user_id'       : self.user_id }
-
+                'user_id'       : self.user_id
+               }
 
 engine = create_engine('sqlite:///stuff.db')
 Base.metadata.create_all(engine)
