@@ -2,5 +2,16 @@
 <head>
 </head>
 <body>
+  <h1>Categories And Stuff</h1>
+  <h2>Categories</h2>
+  {% for i in categories %}
+  {{i.name}}
+  <br/>
+  {% endfor %}
+  <h2>Stuff</h2>
+  {% for i in stuff %}
+  {{i.name}}
+  <br/>
+  {% endfor %}
 </body>
 </html>
