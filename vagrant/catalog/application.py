@@ -11,6 +11,7 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+# cRud
 @app.route('/')
 def showCategoriesAndStuff():
     categories = session.query(Category).order_by(asc(Category.name))
@@ -18,6 +19,7 @@ def showCategoriesAndStuff():
     return render_template('stuff.html', categories=categories,
         stuff=stuff)
 
+# Crud
 @app.route('/categories/new', methods=['GET', 'POST'])
 def createNewCategory():
     if request.method == 'POST':
@@ -29,6 +31,7 @@ def createNewCategory():
     else:
         return render_template('newCategory.html')
 
+# Crud
 @app.route('/stuff/new', methods=['GET', 'POST'])
 def createNewStuff():
     if request.method == 'POST':
