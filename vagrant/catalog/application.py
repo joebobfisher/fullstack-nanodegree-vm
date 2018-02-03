@@ -22,14 +22,6 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 # login functionality
-# Create anti-forgery state token
-@app.route('/login')
-def showLogin():
-    state = ''.join(random.choice(string.ascii_uppercase + string.digits)
-                    for x in xrange(32))
-    login_session['state'] = state
-    return render_template('login.html', STATE=state)
-
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     # Validate state token
@@ -185,7 +177,7 @@ def showCategoriesAndStuff():
     stuff = session.query(Stuff).order_by(asc(Stuff.name))
 
     if ('username' not in login_session):
-        # generate state info in case user wants to log in
+        # Create anti-forgery state token in case user wants to log in
         state = ''.join(random.choice(string.ascii_uppercase + string.digits)
             for x in xrange(32))
         login_session['state'] = state

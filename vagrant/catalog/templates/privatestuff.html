@@ -23,14 +23,18 @@
 
   <h1>Categories And Stuff</h1>
   <h2>Categories</h2>
-  {% for i in categories %}
-  {{i.name}}
-  <br/>
-  {% endfor %}
+  <p>
+    {% for i in categories %}
+    {{ i.name }}
+    <br/>
+    {% endfor %}
+  </p>
   <h2>Stuff</h2>
-  {% for i in stuff %}
-  {{i.name}}
-  <br/>
-  {% endfor %}
+  <p>
+    {% for i in stuff %}
+    {{ i.name }}  <em>({{ i.category_id }})</em>
+    <br/>
+    {% endfor %}
+  </p>
 </body>
 </html>
