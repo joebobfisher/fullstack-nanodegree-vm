@@ -180,37 +180,54 @@ def gdisconnect():
 # cRud
 @app.route('/')
 def showCategoriesAndStuff():
+    # show stuff, whether we're logged in or not
     categories = session.query(Category).order_by(asc(Category.name))
     stuff = session.query(Stuff).order_by(asc(Stuff.name))
-    return render_template('stuff.html', categories=categories,
-        stuff=stuff)
+
+    if ('username' not in login_session):
+        # generate state info in case user wants to log in
+        state = ''.join(random.choice(string.ascii_uppercase + string.digits)
+            for x in xrange(32))
+        login_session['state'] = state
+
+        return render_template('publicstuff.html', categories=categories,
+            stuff=stuff, STATE=state)
+    else:
+        return render_template('privatestuff.html', categories=categories,
+            stuff=stuff, username=login_session['username'], picture=login_session['picture'])
 
 # Crud
 @app.route('/categories/new', methods=['GET', 'POST'])
 def createNewCategory():
-    if request.method == 'POST':
-        newCategory = Category(name=request.form['name'], user_id=0)
-        session.add(newCategory)
-        flash('New Category %s created successfully' % newCategory.name)
-        session.commit()
+    if ('username' not in login_session):
         return redirect(url_for('showCategoriesAndStuff'))
     else:
-        return render_template('newCategory.html')
+        if request.method == 'POST':
+            newCategory = Category(name=request.form['name'], user_id=0)
+            session.add(newCategory)
+            flash('New Category %s created successfully' % newCategory.name)
+            session.commit()
+            return redirect(url_for('showCategoriesAndStuff'))
+        else:
+            return render_template('newCategory.html')
 
 # Crud
 @app.route('/stuff/new', methods=['GET', 'POST'])
 def createNewStuff():
-    if request.method == 'POST':
-        newStuff = Stuff(name=request.form['name'],
-            description=request.form['description'],
-            category_id=0,
-            user_id=0)
-        session.add(newStuff)
-        flash('New Stuff %s created successfully' % newStuff.name)
-        session.commit()
+    if ('username' not in login_session):
         return redirect(url_for('showCategoriesAndStuff'))
     else:
-        return render_template('newStuff.html')
+        if request.method == 'POST':
+            newStuff = Stuff(name=request.form['name'],
+                description=request.form['description'],
+                category_id=0,
+                user_id=0)
+            session.add(newStuff)
+            flash('New Stuff %s created successfully' % newStuff.name)
+            session.commit()
+            return redirect(url_for('showCategoriesAndStuff'))
+        else:
+            return render_template('newStuff.html')
 
 if __name__ == '__main__':
     app.secret_key = '$$6R%$F2mIZxejYy$fv*JJXG3YNg9F2W'

@@ -13,6 +13,14 @@
       {% endif %}
     {% endwith %}
   </div>
+  <div>
+    <p>Logged in as {{ username }}</p>
+    {% if picture %}
+    <img src={{ picture }} style="width: 75px; height: 75px;"/>
+    {% endif %}
+    <p><a href="/gdisconnect">log out</a></p>
+  </div>
+
   <h1>Categories And Stuff</h1>
   <h2>Categories</h2>
   {% for i in categories %}
