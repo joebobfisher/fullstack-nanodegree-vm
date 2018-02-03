@@ -212,7 +212,8 @@ def createNewStuff():
         if request.method == 'POST':
             newStuff = Stuff(name=request.form['name'],
                 description=request.form['description'],
-                category_id=0,
+                # TODO: Fix this so it gets the number of the category!
+                category_id=request.form['category'],
                 user_id=login_session['user_id'])
             session.add(newStuff)
             flash('New Stuff %s created successfully' % newStuff.name)
