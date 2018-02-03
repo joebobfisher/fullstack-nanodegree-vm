@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from model import Base, User, Category, Stuff
 
 from flask import session as login_session
-from flask import make_response
+from flask import make_response, abort
 import random, string
 from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
 import httplib2, requests, json
@@ -199,11 +199,11 @@ def showCategoriesAndStuff():
 # Crud
 @app.route('/categories/new', methods=['GET', 'POST'])
 def createNewCategory():
-    if ('username' not in login_session):
-        return redirect(url_for('showCategoriesAndStuff'))
+    if ('user_id' not in login_session):
+        return abort(404)
     else:
         if request.method == 'POST':
-            newCategory = Category(name=request.form['name'], user_id=0)
+            newCategory = Category(name=request.form['name'], user_id=login_session['user_id'])
             session.add(newCategory)
             flash('New Category %s created successfully' % newCategory.name)
             session.commit()
@@ -214,14 +214,14 @@ def createNewCategory():
 # Crud
 @app.route('/stuff/new', methods=['GET', 'POST'])
 def createNewStuff():
-    if ('username' not in login_session):
-        return redirect(url_for('showCategoriesAndStuff'))
+    if ('user_id' not in login_session):
+        return abort(404)
     else:
         if request.method == 'POST':
             newStuff = Stuff(name=request.form['name'],
                 description=request.form['description'],
                 category_id=0,
-                user_id=0)
+                user_id=login_session['user_id'])
             session.add(newStuff)
             flash('New Stuff %s created successfully' % newStuff.name)
             session.commit()
