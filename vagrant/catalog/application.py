@@ -6,13 +6,9 @@ from model import Base, User, Category, Stuff
 
 from flask import session as login_session
 from flask import make_response
-import random
-import string
-from oauth2client.client import flow_from_clientsecrets
-from oauth2client.client import FlowExchangeError
-import httplib2
-import json
-import requests
+import random, string
+from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
+import httplib2, requests, json
 
 app = Flask(__name__)
 
@@ -105,7 +101,6 @@ def gconnect():
     login_session['username'] = data['name']
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
-    # ADD PROVIDER TO LOGIN SESSION
     login_session['provider'] = 'google'
 
     # See if a user exists, if it doesn't make a new one
@@ -159,14 +154,28 @@ def gdisconnect():
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
     if result['status'] == '200':
+        # delete google-specific login session info
+        del login_session['access_token']
+        del login_session['gplus_id']
+
+        # delete our user's login session info
+        del login_session['provider']
+        del login_session['user_id']
+        del login_session['username']
+        del login_session['email']
+        del login_session['picture']
+
+        # send the good response
         response = make_response(json.dumps('Successfully disconnected.'), 200)
         response.headers['Content-Type'] = 'application/json'
+        flash("You have successfully been logged out.")
+        return redirect(url_for('showCategoriesAndStuff'))
     else:
         # For whatever reason, the given token was invalid.
         response = make_response(
             json.dumps('Failed to revoke token for given user.', 400))
         response.headers['Content-Type'] = 'application/json'
-    return response
+        return response
 
 # cRud
 @app.route('/')
