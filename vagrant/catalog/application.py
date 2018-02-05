@@ -207,6 +207,16 @@ def createNewCategory():
         else:
             return render_template('newCategory.html')
 
+# crUd
+@app.route('/categories/<category_name>/edit/')
+def updateCategory(category_name):
+    return "Page to update category '%s'." % category_name
+
+# cruD
+@app.route('/categories/<category_name>/delete/')
+def deleteCategory(category_name):
+    return "Page to delete category '%s'." % category_name
+
 # Crud
 @app.route('/stuff/new', methods=['GET', 'POST'])
 def createNewStuff():
@@ -224,6 +234,16 @@ def createNewStuff():
             return redirect(url_for('showCategoriesAndStuff'))
         else:
             return render_template('newStuff.html')
+
+# crUd
+@app.route('/stuff/<int:stuff_id>/edit/')
+def updateStuff(stuff_id):
+    return "Page to update stuff #%s." % stuff_id
+
+# cruD
+@app.route('/stuff/<int:stuff_id>/delete/')
+def deleteStuff(stuff_id):
+    return "Page to delete stuff #%s" % stuff_id
 
 if __name__ == '__main__':
     app.secret_key = '$$6R%$F2mIZxejYy$fv*JJXG3YNg9F2W'
