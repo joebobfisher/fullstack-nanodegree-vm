@@ -25,8 +25,7 @@ class User(Base):
 class Category(Base):
     __tablename__ = 'category'
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String(250), nullable=False)
+    name = Column(String(250), nullable=False, primary_key=True)
 
     # who owns this category?
     user_id = Column(Integer, ForeignKey('user.id'))
@@ -34,15 +33,14 @@ class Category(Base):
 
     @property
     def serialize(self):
-        return { 'id'       : self.id,
-                 'name'     : self.name,
+        return { 'name'     : self.name,
                  'user_id'  : self.user_id }
 
 # Need a table of stuff
 #   id
 #   name
 #   description
-#   category_id
+#   category
 #   user_id
 class Stuff(Base):
     __tablename__ = 'stuff'
@@ -52,7 +50,7 @@ class Stuff(Base):
     description = Column(String)
 
     # what category does this stuff belong to?
-    category_id = Column(Integer, ForeignKey('category.id'))
+    category_name = Column(String(250), ForeignKey('category.name'))
     category = relationship(Category)
 
     # who owns this category?
@@ -61,13 +59,11 @@ class Stuff(Base):
 
     @property
     def serialize(self):
-        return {
-                'id'            : self.id,
-                'name'          : self.name,
-                'description'   : self.description,
-                'category_id'   : self.category_id,
-                'user_id'       : self.user_id
-               }
+        return { 'id'            : self.id,
+                 'name'          : self.name,
+                 'description'   : self.description,
+                 'category_name' : self.category_name,
+                 'user_id'       : self.user_id }
 
 engine = create_engine('sqlite:///stuff.db')
 Base.metadata.create_all(engine)

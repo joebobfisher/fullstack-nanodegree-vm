@@ -176,7 +176,7 @@ def showCategoriesAndStuff():
     categories = session.query(Category).order_by(asc(Category.name))
     stuff = session.query(Stuff).order_by(asc(Stuff.name))
 
-    if ('username' not in login_session):
+    if 'username' not in login_session:
         # Create anti-forgery state token in case user wants to log in
         state = ''.join(random.choice(string.ascii_uppercase + string.digits)
             for x in xrange(32))
@@ -191,33 +191,36 @@ def showCategoriesAndStuff():
 # Crud
 @app.route('/categories/new', methods=['GET', 'POST'])
 def createNewCategory():
-    if ('user_id' not in login_session):
+    if 'user_id' not in login_session:
         return abort(404)
     else:
         if request.method == 'POST':
-            newCategory = Category(name=request.form['name'], user_id=login_session['user_id'])
-            session.add(newCategory)
-            flash('New Category %s created successfully' % newCategory.name)
-            session.commit()
-            return redirect(url_for('showCategoriesAndStuff'))
+            if session.query(Category).filter(Category.name == request.form['name']).one_or_none() == None:
+                newCategory = Category(name=request.form['name'], user_id=login_session['user_id'])
+                session.add(newCategory)
+                session.commit()
+                flash('New Category %s created successfully' % newCategory.name)
+                return redirect(url_for('showCategoriesAndStuff'))
+            else:
+                flash('Category %s already exists' % request.form['name'])
+                return redirect(url_for('showCategoriesAndStuff'))
         else:
             return render_template('newCategory.html')
 
 # Crud
 @app.route('/stuff/new', methods=['GET', 'POST'])
 def createNewStuff():
-    if ('user_id' not in login_session):
+    if 'user_id' not in login_session:
         return abort(404)
     else:
         if request.method == 'POST':
             newStuff = Stuff(name=request.form['name'],
                 description=request.form['description'],
-                # TODO: Fix this so it gets the number of the category!
-                category_id=request.form['category'],
+                category_name=request.form['category'],
                 user_id=login_session['user_id'])
             session.add(newStuff)
-            flash('New Stuff %s created successfully' % newStuff.name)
             session.commit()
+            flash('New Stuff %s created successfully' % newStuff.name)
             return redirect(url_for('showCategoriesAndStuff'))
         else:
             return render_template('newStuff.html')

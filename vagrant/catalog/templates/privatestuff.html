@@ -32,7 +32,7 @@
   <h2>Stuff</h2>
   <p>
     {% for i in stuff %}
-    {{ i.name }}  <em>({{ categories[i.category_id].name }})</em>
+    {{ i.name }}  <em>({{ i.category_name }})</em>
     <br/>
     {% endfor %}
   </p>
