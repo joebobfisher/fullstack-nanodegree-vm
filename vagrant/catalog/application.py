@@ -305,6 +305,15 @@ def deleteStuff(stuff_id):
 
 # TODO Apply CSS to HTML pages
 
+# TODO Apply PEP8 Styling
+
+# TODO Comment.
+
+# Optional TODO Protect against CSRF
+# https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet
+
+# Optional TODO Images for stuff
+
 if __name__ == '__main__':
     app.secret_key = '$$6R%$F2mIZxejYy$fv*JJXG3YNg9F2W'
     app.debug = True
