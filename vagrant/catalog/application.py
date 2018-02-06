@@ -10,6 +10,8 @@ import random, string
 from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
 import httplib2, requests, json
 
+from flask import jsonify
+
 app = Flask(__name__)
 
 CLIENT_ID = json.loads(
@@ -301,13 +303,43 @@ def deleteStuff(stuff_id):
     else:
         return render_template('deleteStuff.html', stuff=my_stuff)
 
-# TODO Provide JSON endpoint
+# TODO Provide JSON endpoints
+@app.route('/stuff/<int:stuff_id>/json/')
+def showStuffJson(stuff_id):
+    stuff = session.query(Stuff).filter_by(id=stuff_id).one_or_none()
+    if stuff == None:
+        abort(404)
+    else:
+        return jsonify(Stuff=stuff.serialize)
+
+@app.route('/categories/<category_name>/json/')
+def showCategoryJson(category_name):
+    category = session.query(Category).filter_by(name=category_name).one_or_none()
+    if category == None:
+        abort(404)
+    else:
+        stuff = session.query(Stuff).filter_by(category_name=category_name).all()
+        if stuff == None:
+            return jsonify(Category=category.serialize)
+        else:
+            return jsonify(Category=category.serialize, Stuff_In_Category=[i.serialize for i in stuff])
+
+@app.route('/json/')
+def showEverythingJson():
+    categories = session.query(Category).all()
+    stuff = session.query(Stuff).all()
+    if categories == None or stuff == None:
+        abort(404)
+    else:
+        return jsonify(Categories=[i.serialize for i in categories], Stuff=[i.serialize for i in stuff])
 
 # TODO Apply CSS to HTML pages
 
 # TODO Apply PEP8 Styling
 
-# TODO Comment.
+# TODO Comment code
+
+# TODO Document in README
 
 # Optional TODO Protect against CSRF
 # https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet
