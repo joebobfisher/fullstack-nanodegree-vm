@@ -1,45 +1,30 @@
-<html>
-<head>
-  <!--LOAD PRE-REQUISITES FOR GOOGLE SIGN IN -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <script src="https://apis.google.com/js/platform.js?onload=start"></script>
-  <!-- END PRE-REQUISITES FOR GOOGLE SIGN IN -->
-</head>
-<body>
-  <div class = 'flash'>
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-    <ul>
-        {% for message in messages %}
-      <li> <strong> {{ message }} </strong> </li>
+{% extends "main.html" %}
+{% block content %}
+{% include "publicnav.html" %}
+{% include "flash.html" %}
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12">
+        <h1 class="title-header">Categories And Stuff</h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+        <h4 class="subheader-header">Categories</h4>
+        {% for i in categories %}
+        <a href='{{ url_for('showCategory', category_name=i.name) }}'>{{ i.name }}</a>
+        <br/>
         {% endfor %}
-    </ul>
-      {% endif %}
-    {% endwith %}
+      </div>
+      <div class="col-md-8">
+        <h4 class="subheader-header">Stuff</h4>
+        {% for i in stuff %}
+        <a href='{{ url_for('showStuff', stuff_id=i.id) }}'>{{ i.name }}</a> <em>({{ i.category_name }})</em>
+        <br/>
+        {% endfor %}
+      </div>
+    </div>
   </div>
-  <div id="signinButton">
-    <span class="g-signin"
-          data-scope="openid email"
-          data-clientid="313570040368-tb3390a1v7eesmfrclrog4v4d6njfsr4.apps.googleusercontent.com"
-          data-redirecturi="postmessage"
-          data-accesstype="offline"
-          data-cookiepolicy="single_host_origin"
-          data-callback="signInCallback"
-          data-approvalprompt="force">
-    </span>
-  </div>
-
-  <h1>Categories And Stuff</h1>
-  <h2>Categories</h2>
-  {% for i in categories %}
-  <a href='{{ url_for('showCategory', category_name=i.name) }}'>{{ i.name }}</a>
-  <br/>
-  {% endfor %}
-  <h2>Stuff</h2>
-  {% for i in stuff %}
-  <a href='{{ url_for('showStuff', stuff_id=i.id) }}'>{{ i.name }}</a> <em>({{ i.category_name }})</em>
-  <br/>
-  {% endfor %}
 
   <script>
   function signInCallback(authResult) {
@@ -67,5 +52,4 @@
     }
   }
   </script>
-</body>
-</html>
+{% endblock %}

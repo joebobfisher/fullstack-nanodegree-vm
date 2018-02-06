@@ -1,0 +1,41 @@
+/* My custom CSS styles
+ * Note: C++-style comments ('//') seem to kill some
+ * bootstrap functionality...*/
+
+/* TODO:  add more awesomeness,
+ *        add sticky navbar after user scrolls down,
+ *        add gradients to said navbar */
+
+body {
+  font-family: 'Press Start 2P', cursive;
+  color: black;
+  background-color: white;
+  font-size: 12px;
+}
+
+.navbar {
+  background-color: #d8d8d8;
+  border-bottom: 1px solid #000;
+}
+
+.flashes {
+  padding-top: 20px;
+  color: red;
+}
+
+.categories {
+  color: gray;
+}
+
+.title-header {
+  padding-bottom: 10px;
+}
+
+.subheader-header {
+  padding-top: 10px;
+  padding-bottom: 5px;
+}
+
+a {
+  color: orange;
+}
