@@ -1,0 +1,17 @@
+<html>
+<head>
+</head>
+<body>
+  <h1>Edit Stuff</h1>
+  <form action="#" method='post'>
+    <p>Name:</p>
+    <input type='text' name='name' value='{{ stuff.name }}'>
+    <p>Description:</p>
+    <input type='text' name='description' value='{{ stuff.description }}'>
+    <p>Category:</p>
+    <input type='text' name='category' value='{{ stuff.category_name }}'>
+    <input type='submit' value='Done'>
+  </form>
+  <a href='{{ url_for('showCategoriesAndStuff') }}'>Cancel</a>
+</body>
+</html>

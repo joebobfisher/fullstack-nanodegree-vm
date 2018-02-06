@@ -163,7 +163,7 @@ def gdisconnect():
     flash("You have successfully been logged out.")
     return redirect(url_for('showCategoriesAndStuff'))
 
-# cRud
+# CRUD Functionality
 @app.route('/')
 def showCategoriesAndStuff():
     # show stuff, whether we're logged in or not
@@ -182,7 +182,7 @@ def showCategoriesAndStuff():
         return render_template('privateCategoriesAndStuff.html', categories=categories,
             stuff=stuff, username=login_session['username'], picture=login_session['picture'])
 
-# cRud
+# Read Catgegories
 @app.route('/categories/<category_name>')
 def showCategory(category_name):
     my_category = session.query(Category).filter(Category.name == category_name).one_or_none()
@@ -196,7 +196,7 @@ def showCategory(category_name):
         else:
             return render_template('privateCategory.html', category=category_name, stuff=stuff_in_category)
 
-# Crud
+# Create Categories
 @app.route('/categories/new', methods=['GET', 'POST'])
 def createNewCategory():
     if 'user_id' not in login_session:
@@ -215,7 +215,7 @@ def createNewCategory():
         else:
             return render_template('newCategory.html')
 
-# cruD
+# Delete Categories
 @app.route('/categories/<category_name>/delete/', methods=['GET', 'POST'])
 def deleteCategory(category_name):
     if 'user_id' not in login_session:
@@ -223,11 +223,9 @@ def deleteCategory(category_name):
     else:
         category = session.query(Category).filter(Category.name == category_name).one_or_none()
         if category == None:
-            flash('Category %s doesn\'t exist.' % request.form['name'])
-            return redirect(url_for('showCategoriesAndStuff'))
+            abort(404)
         elif login_session['user_id'] != category.user_id:
-            flash('Category %s doesn\'t belong to you.' % category.name)
-            return redirect(url_for('showCategoriesAndStuff'))
+            abort(404)
         elif session.query(Stuff).filter(Stuff.category_name == category.name).one_or_none() != None:
             flash('Category is not empty. Delete or edit the stuff that is currently categoriezed under \'%s\'.' % category.name)
             return redirect(url_for('showCategoriesAndStuff'))
@@ -239,20 +237,19 @@ def deleteCategory(category_name):
         else:
             return render_template('deleteCategory.html', category=category_name)
 
-# cRud
+# Read Stuff
 @app.route('/stuff/<int:stuff_id>/')
 def showStuff(stuff_id):
     my_stuff = session.query(Stuff).filter(Stuff.id == stuff_id).one_or_none()
     if my_stuff == None:
-        flash('That stuff doesn\'t exist.')
-        return redirect(url_for('showCategoriesAndStuff'))
+        abort(404)
     else:
         if 'user_id' not in login_session or login_session['user_id'] != my_stuff.user_id:
             return render_template('publicStuff.html', stuff=my_stuff)
         else:
             return render_template('privateStuff.html', stuff=my_stuff)
 
-# Crud
+# Create Stuff
 @app.route('/stuff/new', methods=['GET', 'POST'])
 def createNewStuff():
     if 'user_id' not in login_session:
@@ -270,15 +267,43 @@ def createNewStuff():
         else:
             return render_template('newStuff.html')
 
-# crUd
-@app.route('/stuff/<int:stuff_id>/edit/')
+# Update Stuff
+@app.route('/stuff/<int:stuff_id>/edit/', methods=['GET', 'POST'])
 def updateStuff(stuff_id):
-    return "Page to update stuff #%s." % stuff_id
+    my_stuff = session.query(Stuff).filter(Stuff.id == stuff_id).one_or_none()
+    if my_stuff == None:
+        abort(404)
+    elif 'user_id' not in login_session or login_session['user_id'] != my_stuff.user_id:
+        abort(404)
+    elif request.method == 'POST':
+        my_stuff.name = request.form['name']
+        my_stuff.description = request.form['description']
+        my_stuff.category_name = request.form['category']
+        session.add(my_stuff)
+        session.commit()
+        flash ('Stuff %s updated' % my_stuff.name)
+        return redirect(url_for('showStuff', stuff_id=stuff_id))
+    else:
+        return render_template('updateStuff.html', stuff=my_stuff)
 
-# cruD
-@app.route('/stuff/<int:stuff_id>/delete/')
+# Delete Stuff
+@app.route('/stuff/<int:stuff_id>/delete/', methods=['GET', 'POST'])
 def deleteStuff(stuff_id):
-    return "Page to delete stuff #%s" % stuff_id
+    my_stuff = session.query(Stuff).filter(Stuff.id == stuff_id).one_or_none()
+    if my_stuff == None:
+        abort(404)
+    elif 'user_id' not in login_session or login_session['user_id'] != my_stuff.user_id:
+        abort(404)
+    elif request.method == 'POST':
+        session.delete(my_stuff)
+        session.commit()
+        flash ('Stuff %s deleted' % my_stuff.name)
+    else:
+        return render_template('deleteStuff.html', stuff=my_stuff)
+
+# TODO Provide JSON endpoint
+
+# TODO Apply CSS to HTML pages
 
 if __name__ == '__main__':
     app.secret_key = '$$6R%$F2mIZxejYy$fv*JJXG3YNg9F2W'
