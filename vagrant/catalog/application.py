@@ -215,11 +215,6 @@ def createNewCategory():
         else:
             return render_template('newCategory.html')
 
-# crUd
-@app.route('/categories/<category_name>/edit/')
-def updateCategory(category_name):
-    return "Page to update category '%s'." % category_name
-
 # cruD
 @app.route('/categories/<category_name>/delete/', methods=['GET', 'POST'])
 def deleteCategory(category_name):
@@ -243,6 +238,19 @@ def deleteCategory(category_name):
             return redirect(url_for('showCategoriesAndStuff'))
         else:
             return render_template('deleteCategory.html', category=category_name)
+
+# cRud
+@app.route('/stuff/<int:stuff_id>/')
+def showStuff(stuff_id):
+    my_stuff = session.query(Stuff).filter(Stuff.id == stuff_id).one_or_none()
+    if my_stuff == None:
+        flash('That stuff doesn\'t exist.')
+        return redirect(url_for('showCategoriesAndStuff'))
+    else:
+        if 'user_id' not in login_session or login_session['user_id'] != my_stuff.user_id:
+            return render_template('publicStuff.html', stuff=my_stuff)
+        else:
+            return render_template('privateStuff.html', stuff=my_stuff)
 
 # Crud
 @app.route('/stuff/new', methods=['GET', 'POST'])

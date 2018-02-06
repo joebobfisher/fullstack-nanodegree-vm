@@ -1,0 +1,13 @@
+<html>
+<head>
+</head>
+<body>
+  <h1>{{ stuff.name }}</h1>
+  <p>{{ stuff.description }}</p>
+  <br/>
+  <br/>
+  <a href='{{ url_for('updateStuff', stuff_id=stuff.id) }}'>Edit</a>
+  |
+  <a href='{{ url_for('deleteStuff', stuff_id=stuff.id) }}'>Delete</a>
+</body>
+</html>

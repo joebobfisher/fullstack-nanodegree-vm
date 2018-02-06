@@ -37,7 +37,7 @@
   {% endfor %}
   <h2>Stuff</h2>
   {% for i in stuff %}
-  {{ i.name }} <em>({{ i.category_name }})</em>
+  <a href='{{ url_for('showStuff', stuff_id=i.id) }}'>{{ i.name }}</a> <em>({{ i.category_name }})</em>
   <br/>
   {% endfor %}
 
