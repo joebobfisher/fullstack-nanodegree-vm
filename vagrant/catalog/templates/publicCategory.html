@@ -1,0 +1,13 @@
+<html>
+<head>
+</head>
+<body>
+  <h1>{{ category }}</h1>
+  {% for i in stuff %}
+    {% if i.category_name == category %}
+  {{ i.name }}
+  <br/>
+    {% endif %}
+  {% endfor %}
+</body>
+</html>

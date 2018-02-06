@@ -1,0 +1,13 @@
+<html>
+<head>
+</head>
+<body>
+  <h1>{{ category }}</h1>
+  {% for i in stuff %}
+  {{ i.name }}
+  <br/>
+  {% endfor %}
+  <br/>
+  <a href='{{ url_for('deleteCategory', category_name=category) }}'>Delete category</a>
+</body>
+</html>

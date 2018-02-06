@@ -32,12 +32,12 @@
   <h1>Categories And Stuff</h1>
   <h2>Categories</h2>
   {% for i in categories %}
-  {{i.name}}
+  <a href='{{ url_for('showCategory', category_name=i.name) }}'>{{ i.name }}</a>
   <br/>
   {% endfor %}
   <h2>Stuff</h2>
   {% for i in stuff %}
-  {{i.name}} <em>({{ i.category_name }})</em>
+  {{ i.name }} <em>({{ i.category_name }})</em>
   <br/>
   {% endfor %}
 

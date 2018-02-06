@@ -145,29 +145,23 @@ def gdisconnect():
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
-    if result['status'] == '200':
-        # delete google-specific login session info
-        del login_session['access_token']
-        del login_session['gplus_id']
 
-        # delete our user's login session info
-        del login_session['provider']
-        del login_session['user_id']
-        del login_session['username']
-        del login_session['email']
-        del login_session['picture']
+    # delete google-specific login session info
+    del login_session['access_token']
+    del login_session['gplus_id']
 
-        # send the good response
-        response = make_response(json.dumps('Successfully disconnected.'), 200)
-        response.headers['Content-Type'] = 'application/json'
-        flash("You have successfully been logged out.")
-        return redirect(url_for('showCategoriesAndStuff'))
-    else:
-        # For whatever reason, the given token was invalid.
-        response = make_response(
-            json.dumps('Failed to revoke token for given user.', 400))
-        response.headers['Content-Type'] = 'application/json'
-        return response
+    # delete our user's login session info
+    del login_session['provider']
+    del login_session['user_id']
+    del login_session['username']
+    del login_session['email']
+    del login_session['picture']
+
+    # send the good response
+    response = make_response(json.dumps('Successfully disconnected.'), 200)
+    response.headers['Content-Type'] = 'application/json'
+    flash("You have successfully been logged out.")
+    return redirect(url_for('showCategoriesAndStuff'))
 
 # cRud
 @app.route('/')
@@ -182,11 +176,25 @@ def showCategoriesAndStuff():
             for x in xrange(32))
         login_session['state'] = state
 
-        return render_template('publicstuff.html', categories=categories,
+        return render_template('publicCategoriesAndStuff.html', categories=categories,
             stuff=stuff, STATE=state)
     else:
-        return render_template('privatestuff.html', categories=categories,
+        return render_template('privateCategoriesAndStuff.html', categories=categories,
             stuff=stuff, username=login_session['username'], picture=login_session['picture'])
+
+# cRud
+@app.route('/categories/<category_name>')
+def showCategory(category_name):
+    my_category = session.query(Category).filter(Category.name == category_name).one_or_none()
+    if my_category == None:
+        flash('Category %s doesn\'t exist.' % request.form['name'])
+        return redirect(url_for('showCategoriesAndStuff'))
+    else:
+        stuff_in_category = session.query(Stuff).filter(Stuff.category_name == category_name).all()
+        if 'user_id' not in login_session or login_session['user_id'] != my_category.user_id:
+            return render_template('publicCategory.html', category=category_name, stuff=stuff_in_category)
+        else:
+            return render_template('privateCategory.html', category=category_name, stuff=stuff_in_category)
 
 # Crud
 @app.route('/categories/new', methods=['GET', 'POST'])
