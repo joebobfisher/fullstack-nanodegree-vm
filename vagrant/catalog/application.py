@@ -213,7 +213,7 @@ def updateCategory(category_name):
     return "Page to update category '%s'." % category_name
 
 # cruD
-@app.route('/categories/<category_name>/delete/')
+@app.route('/categories/<category_name>/delete/', methods=['GET', 'POST'])
 def deleteCategory(category_name):
     if 'user_id' not in login_session:
         return abort(404)
@@ -226,7 +226,7 @@ def deleteCategory(category_name):
             flash('Category %s doesn\'t belong to you.' % category.name)
             return redirect(url_for('showCategoriesAndStuff'))
         elif session.query(Stuff).filter(Stuff.category_name == category.name).one_or_none() != None:
-            flash('Category \'%s\' is not empty. Delete or edit the stuff that is currently categoriezed under \'%s\'.' % category.name)
+            flash('Category is not empty. Delete or edit the stuff that is currently categoriezed under \'%s\'.' % category.name)
             return redirect(url_for('showCategoriesAndStuff'))
         elif request.method == 'POST':
             session.delete(category)
