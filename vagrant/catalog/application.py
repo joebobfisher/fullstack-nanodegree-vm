@@ -6,9 +6,12 @@ from model import Base, User, Category, Stuff
 
 from flask import session as login_session
 from flask import make_response, abort
-import random, string
+import random
+import string
 from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
-import httplib2, requests, json
+import httplib2
+import requests
+import json
 
 from flask import jsonify
 
@@ -22,6 +25,7 @@ engine = create_engine('sqlite:///stuff.db')
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
+
 
 # login functionality
 @app.route('/gconnect', methods=['POST'])
@@ -76,8 +80,8 @@ def gconnect():
     stored_access_token = login_session.get('access_token')
     stored_gplus_id = login_session.get('gplus_id')
     if stored_access_token is not None and gplus_id == stored_gplus_id:
-        response = make_response(json.dumps('Current user is already connected.'),
-                                 200)
+        response = make_response(
+            json.dumps('Current user is already connected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -99,7 +103,7 @@ def gconnect():
 
     # See if a user exists, if it doesn't make a new one
     user_id = getUserID(login_session['email'])
-    if (user_id == None):
+    if (user_id is None):
         # Create a new one
         user_id = createUser(login_session)
     login_session['user_id'] = user_id
@@ -111,6 +115,7 @@ def gconnect():
     flash("you are now logged in as %s" % login_session['username'])
     return "Good to go."
 
+
 # User helper functions
 def createUser(login_session):
     newUser = User(name=login_session['username'], email=login_session[
@@ -120,12 +125,14 @@ def createUser(login_session):
     user = session.query(User).filter_by(email=login_session['email']).one()
     return user.id
 
+
 def getUserID(email):
-    try:
-        user = session.query(User).filter_by(email=email).one()
-        return user.id
-    except:
+    user = session.query(User).filter_by(email=email).one_or_none()
+    if (user is None):
         return None
+    else:
+        return user.id
+
 
 # DISCONNECT - Revoke a current user's token and reset their login_session
 @app.route('/gdisconnect')
@@ -158,6 +165,7 @@ def gdisconnect():
     flash("You have successfully been logged out.")
     return redirect(url_for('showCategoriesAndStuff'))
 
+
 # CRUD Functionality
 @app.route('/')
 def showCategoriesAndStuff():
@@ -168,28 +176,48 @@ def showCategoriesAndStuff():
     if 'username' not in login_session:
         # Create anti-forgery state token in case user wants to log in
         state = ''.join(random.choice(string.ascii_uppercase + string.digits)
-            for x in xrange(32))
+                        for x in xrange(32))
         login_session['state'] = state
 
-        return render_template('categoriesAndStuff.html', categories=categories,
-            stuff=stuff, STATE=state, name=None, pic=None)
+        return render_template('categoriesAndStuff.html',
+                               categories=categories,
+                               stuff=stuff,
+                               STATE=state,
+                               name=None,
+                               pic=None)
     else:
-        return render_template('categoriesAndStuff.html', categories=categories,
-            stuff=stuff, name=login_session['username'], pic=login_session['picture'])
+        return render_template('categoriesAndStuff.html',
+                               categories=categories,
+                               stuff=stuff,
+                               name=login_session['username'],
+                               pic=login_session['picture'])
+
 
 # Read Catgegories
 @app.route('/categories/<category_name>')
 def showCategory(category_name):
-    my_category = session.query(Category).filter(Category.name == category_name).one_or_none()
-    if my_category == None:
+    my_category = session.query(Category).filter(
+        Category.name == category_name).one_or_none()
+    if my_category is None:
         flash('Category %s doesn\'t exist.' % request.form['name'])
         return redirect(url_for('showCategoriesAndStuff'))
     else:
-        stuff_in_category = session.query(Stuff).filter(Stuff.category_name == category_name).all()
-        if 'user_id' not in login_session or login_session['user_id'] != my_category.user_id:
-            return render_template('category.html', category=category_name, stuff=stuff_in_category, name=None, pic=None)
+        stuff_in_category = session.query(Stuff).filter(
+            Stuff.category_name == category_name).all()
+        if ('user_id' not in login_session or
+                login_session['user_id'] != my_category.user_id):
+            return render_template('category.html',
+                                   category=category_name,
+                                   stuff=stuff_in_category,
+                                   name=None,
+                                   pic=None)
         else:
-            return render_template('category.html', category=category_name, stuff=stuff_in_category, name=login_session['username'], pic=login_session['picture'])
+            return render_template('category.html',
+                                   category=category_name,
+                                   stuff=stuff_in_category,
+                                   name=login_session['username'],
+                                   pic=login_session['picture'])
+
 
 # Create Categories
 @app.route('/categories/new', methods=['GET', 'POST'])
@@ -198,17 +226,24 @@ def createNewCategory():
         return abort(404)
     else:
         if request.method == 'POST':
-            if session.query(Category).filter(Category.name == request.form['name']).one_or_none() == None:
-                newCategory = Category(name=request.form['name'], user_id=login_session['user_id'])
+            category = session.query(Category).filter(
+                Category.name == request.form['name']).one_or_none()
+            if category is None:
+                newCategory = Category(name=request.form['name'],
+                                       user_id=login_session['user_id'])
                 session.add(newCategory)
                 session.commit()
-                flash('New Category %s created successfully' % newCategory.name)
+                flash('New Category %s created successfully'
+                      % newCategory.name)
                 return redirect(url_for('showCategoriesAndStuff'))
             else:
                 flash('Category %s already exists' % request.form['name'])
                 return redirect(url_for('showCategoriesAndStuff'))
         else:
-            return render_template('newCategory.html', name=login_session['username'], pic=login_session['picture'])
+            return render_template('newCategory.html',
+                                   name=login_session['username'],
+                                   pic=login_session['picture'])
+
 
 # Delete Categories
 @app.route('/categories/<category_name>/delete/', methods=['GET', 'POST'])
@@ -216,13 +251,17 @@ def deleteCategory(category_name):
     if 'user_id' not in login_session:
         return abort(404)
     else:
-        category = session.query(Category).filter(Category.name == category_name).one_or_none()
-        if category == None:
+        category = session.query(Category).filter(
+            Category.name == category_name).one_or_none()
+        if category is None:
             abort(404)
         elif login_session['user_id'] != category.user_id:
             abort(404)
-        elif session.query(Stuff).filter(Stuff.category_name == category.name).one_or_none() != None:
-            flash('Category is not empty. Delete or edit the stuff that is currently categoriezed under \'%s\'.' % category.name)
+        elif (session.query(Stuff).filter(
+                Stuff.category_name == category.name).one_or_none()
+                is not None):
+            flash('Category is not empty. Delete or edit the stuff that is' +
+                  ' currently categoriezed under \'%s\'.' % category.name)
             return redirect(url_for('showCategoriesAndStuff'))
         elif request.method == 'POST':
             session.delete(category)
@@ -230,19 +269,31 @@ def deleteCategory(category_name):
             flash('Category \'%s\' deleted.' % category.name)
             return redirect(url_for('showCategoriesAndStuff'))
         else:
-            return render_template('deleteCategory.html', category=category_name, name=login_session['username'], pic=login_session['picture'])
+            return render_template('deleteCategory.html',
+                                   category=category_name,
+                                   name=login_session['username'],
+                                   pic=login_session['picture'])
+
 
 # Read Stuff
 @app.route('/stuff/<int:stuff_id>/')
 def showStuff(stuff_id):
     my_stuff = session.query(Stuff).filter(Stuff.id == stuff_id).one_or_none()
-    if my_stuff == None:
+    if my_stuff is None:
         abort(404)
     else:
-        if 'user_id' not in login_session or login_session['user_id'] != my_stuff.user_id:
-            return render_template('stuff.html', stuff=my_stuff, name=None, pic=None)
+        if ('user_id' not in login_session or
+                login_session['user_id'] != my_stuff.user_id):
+            return render_template('stuff.html',
+                                   stuff=my_stuff,
+                                   name=None,
+                                   pic=None)
         else:
-            return render_template('stuff.html', stuff=my_stuff, name=login_session['username'], pic=login_session['picture'])
+            return render_template('stuff.html',
+                                   stuff=my_stuff,
+                                   name=login_session['username'],
+                                   pic=login_session['picture'])
+
 
 # Create Stuff
 @app.route('/stuff/new', methods=['GET', 'POST'])
@@ -252,23 +303,27 @@ def createNewStuff():
     else:
         if request.method == 'POST':
             newStuff = Stuff(name=request.form['name'],
-                description=request.form['description'],
-                category_name=request.form['category'],
-                user_id=login_session['user_id'])
+                             description=request.form['description'],
+                             category_name=request.form['category'],
+                             user_id=login_session['user_id'])
             session.add(newStuff)
             session.commit()
             flash('New Stuff %s created successfully' % newStuff.name)
             return redirect(url_for('showCategoriesAndStuff'))
         else:
-            return render_template('newStuff.html', name=login_session['username'], pic=login_session['picture'])
+            return render_template('newStuff.html',
+                                   name=login_session['username'],
+                                   pic=login_session['picture'])
+
 
 # Update Stuff
 @app.route('/stuff/<int:stuff_id>/edit/', methods=['GET', 'POST'])
 def updateStuff(stuff_id):
     my_stuff = session.query(Stuff).filter(Stuff.id == stuff_id).one_or_none()
-    if my_stuff == None:
+    if my_stuff is None:
         abort(404)
-    elif 'user_id' not in login_session or login_session['user_id'] != my_stuff.user_id:
+    elif ('user_id' not in login_session or
+            login_session['user_id'] != my_stuff.user_id):
         abort(404)
     elif request.method == 'POST':
         my_stuff.name = request.form['name']
@@ -276,59 +331,71 @@ def updateStuff(stuff_id):
         my_stuff.category_name = request.form['category']
         session.add(my_stuff)
         session.commit()
-        flash ('Stuff %s updated' % my_stuff.name)
+        flash('Stuff %s updated' % my_stuff.name)
         return redirect(url_for('showStuff', stuff_id=stuff_id))
     else:
-        return render_template('updateStuff.html', stuff=my_stuff, name=login_session['username'], pic=login_session['picture'])
+        return render_template('updateStuff.html',
+                               stuff=my_stuff,
+                               name=login_session['username'],
+                               pic=login_session['picture'])
+
 
 # Delete Stuff
 @app.route('/stuff/<int:stuff_id>/delete/', methods=['GET', 'POST'])
 def deleteStuff(stuff_id):
     my_stuff = session.query(Stuff).filter(Stuff.id == stuff_id).one_or_none()
-    if my_stuff == None:
+    if my_stuff is None:
         abort(404)
-    elif 'user_id' not in login_session or login_session['user_id'] != my_stuff.user_id:
+    elif ('user_id' not in login_session or
+            login_session['user_id'] != my_stuff.user_id):
         abort(404)
     elif request.method == 'POST':
         session.delete(my_stuff)
         session.commit()
-        flash ('Stuff %s deleted' % my_stuff.name)
+        flash('Stuff %s deleted' % my_stuff.name)
     else:
-        return render_template('deleteStuff.html', stuff=my_stuff, name=login_session['username'], pic=login_session['picture'])
+        return render_template('deleteStuff.html',
+                               stuff=my_stuff,
+                               name=login_session['username'],
+                               pic=login_session['picture'])
+
 
 # JSON Endpoints
 @app.route('/stuff/<int:stuff_id>/json/')
 def showStuffJson(stuff_id):
     stuff = session.query(Stuff).filter_by(id=stuff_id).one_or_none()
-    if stuff == None:
+    if stuff is None:
         abort(404)
     else:
         return jsonify(Stuff=stuff.serialize)
 
+
 @app.route('/categories/<category_name>/json/')
 def showCategoryJson(category_name):
-    category = session.query(Category).filter_by(name=category_name).one_or_none()
-    if category == None:
+    category = session.query(Category).filter_by(
+        name=category_name).one_or_none()
+    if category is None:
         abort(404)
     else:
-        stuff = session.query(Stuff).filter_by(category_name=category_name).all()
-        if stuff == None:
+        stuff = session.query(Stuff).filter_by(
+            category_name=category_name).all()
+        if stuff is None:
             return jsonify(Category=category.serialize)
         else:
-            return jsonify(Category=category.serialize, Stuff_In_Category=[i.serialize for i in stuff])
+            return jsonify(Category=category.serialize,
+                           Stuff_In_Category=[i.serialize for i in stuff])
+
 
 @app.route('/json/')
 def showEverythingJson():
     categories = session.query(Category).all()
     stuff = session.query(Stuff).all()
-    if categories == None or stuff == None:
+    if categories is None or stuff is None:
         abort(404)
     else:
-        return jsonify(Categories=[i.serialize for i in categories], Stuff=[i.serialize for i in stuff])
+        return jsonify(Categories=[i.serialize for i in categories],
+                       Stuff=[i.serialize for i in stuff])
 
-# TODO Apply CSS to HTML pages
-
-# TODO Apply PEP8 Styling
 
 # TODO Comment code
 
