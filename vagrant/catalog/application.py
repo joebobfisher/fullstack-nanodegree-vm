@@ -104,15 +104,12 @@ def gconnect():
         user_id = createUser(login_session)
     login_session['user_id'] = user_id
 
-    output = ''
-    output += '<h1>Welcome, '
-    output += login_session['username']
-    output += '!</h1>'
-    output += '<img src="'
-    output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+    # send the good response
+    response = make_response(json.dumps('Successfully Connected.'), 200)
+    response.headers['Content-Type'] = 'application/json'
+
     flash("you are now logged in as %s" % login_session['username'])
-    return output
+    return "Good to go."
 
 # User helper functions
 def createUser(login_session):
@@ -122,10 +119,6 @@ def createUser(login_session):
     session.commit()
     user = session.query(User).filter_by(email=login_session['email']).one()
     return user.id
-
-def getUserInfo(user_id):
-    user = session.query(User).filter_by(id=user_id).one()
-    return user
 
 def getUserID(email):
     try:
@@ -178,11 +171,11 @@ def showCategoriesAndStuff():
             for x in xrange(32))
         login_session['state'] = state
 
-        return render_template('publicCategoriesAndStuff.html', categories=categories,
-            stuff=stuff, STATE=state)
+        return render_template('categoriesAndStuff.html', categories=categories,
+            stuff=stuff, STATE=state, name=None, pic=None)
     else:
-        return render_template('privateCategoriesAndStuff.html', categories=categories,
-            stuff=stuff, username=login_session['username'], picture=login_session['picture'])
+        return render_template('categoriesAndStuff.html', categories=categories,
+            stuff=stuff, name=login_session['username'], pic=login_session['picture'])
 
 # Read Catgegories
 @app.route('/categories/<category_name>')
@@ -194,9 +187,9 @@ def showCategory(category_name):
     else:
         stuff_in_category = session.query(Stuff).filter(Stuff.category_name == category_name).all()
         if 'user_id' not in login_session or login_session['user_id'] != my_category.user_id:
-            return render_template('publicCategory.html', category=category_name, stuff=stuff_in_category)
+            return render_template('category.html', category=category_name, stuff=stuff_in_category, name=None, pic=None)
         else:
-            return render_template('privateCategory.html', category=category_name, stuff=stuff_in_category)
+            return render_template('category.html', category=category_name, stuff=stuff_in_category, name=login_session['username'], pic=login_session['picture'])
 
 # Create Categories
 @app.route('/categories/new', methods=['GET', 'POST'])
@@ -215,7 +208,7 @@ def createNewCategory():
                 flash('Category %s already exists' % request.form['name'])
                 return redirect(url_for('showCategoriesAndStuff'))
         else:
-            return render_template('newCategory.html')
+            return render_template('newCategory.html', name=login_session['username'], pic=login_session['picture'])
 
 # Delete Categories
 @app.route('/categories/<category_name>/delete/', methods=['GET', 'POST'])
@@ -237,7 +230,7 @@ def deleteCategory(category_name):
             flash('Category \'%s\' deleted.' % category.name)
             return redirect(url_for('showCategoriesAndStuff'))
         else:
-            return render_template('deleteCategory.html', category=category_name)
+            return render_template('deleteCategory.html', category=category_name, name=login_session['username'], pic=login_session['picture'])
 
 # Read Stuff
 @app.route('/stuff/<int:stuff_id>/')
@@ -247,9 +240,9 @@ def showStuff(stuff_id):
         abort(404)
     else:
         if 'user_id' not in login_session or login_session['user_id'] != my_stuff.user_id:
-            return render_template('publicStuff.html', stuff=my_stuff)
+            return render_template('stuff.html', stuff=my_stuff, name=None, pic=None)
         else:
-            return render_template('privateStuff.html', stuff=my_stuff)
+            return render_template('stuff.html', stuff=my_stuff, name=login_session['username'], pic=login_session['picture'])
 
 # Create Stuff
 @app.route('/stuff/new', methods=['GET', 'POST'])
@@ -267,7 +260,7 @@ def createNewStuff():
             flash('New Stuff %s created successfully' % newStuff.name)
             return redirect(url_for('showCategoriesAndStuff'))
         else:
-            return render_template('newStuff.html')
+            return render_template('newStuff.html', name=login_session['username'], pic=login_session['picture'])
 
 # Update Stuff
 @app.route('/stuff/<int:stuff_id>/edit/', methods=['GET', 'POST'])
@@ -286,7 +279,7 @@ def updateStuff(stuff_id):
         flash ('Stuff %s updated' % my_stuff.name)
         return redirect(url_for('showStuff', stuff_id=stuff_id))
     else:
-        return render_template('updateStuff.html', stuff=my_stuff)
+        return render_template('updateStuff.html', stuff=my_stuff, name=login_session['username'], pic=login_session['picture'])
 
 # Delete Stuff
 @app.route('/stuff/<int:stuff_id>/delete/', methods=['GET', 'POST'])
@@ -301,7 +294,7 @@ def deleteStuff(stuff_id):
         session.commit()
         flash ('Stuff %s deleted' % my_stuff.name)
     else:
-        return render_template('deleteStuff.html', stuff=my_stuff)
+        return render_template('deleteStuff.html', stuff=my_stuff, name=login_session['username'], pic=login_session['picture'])
 
 # JSON Endpoints
 @app.route('/stuff/<int:stuff_id>/json/')

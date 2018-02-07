@@ -36,6 +36,10 @@ body {
   padding-bottom: 5px;
 }
 
+.my-form {
+  padding-bottom: 0px;
+}
+
 a {
   color: orange;
 }

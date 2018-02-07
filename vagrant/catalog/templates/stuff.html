@@ -1,0 +1,18 @@
+{% extends "main.html" %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <h1 class="title-header">{{ stuff.name }}</h1>
+      <p><em>{{ stuff.category_name }}</em></p>
+      <p>{{ stuff.description }}</p>
+      {% if name %}
+      <br/>
+      <a href='{{ url_for('updateStuff', stuff_id=stuff.id) }}'>Edit</a>
+      |
+      <a href='{{ url_for('deleteStuff', stuff_id=stuff.id) }}'>Delete</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

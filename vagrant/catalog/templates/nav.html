@@ -1,0 +1,48 @@
+<nav class="navbar navbar-default navbar-static-top">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/" style="color:black">Stuff App</a>
+    </div>
+    {% if name %}
+    <div class="navbar-right">
+      {% if pic %}
+      <img alt="user pic" src={{ pic }} style="width: 50px; height: 50px;"/>
+      {% endif %}
+      {{ name }}
+      <a class="navbar-link" href="/gdisconnect" style="color:black">log out</a>
+    </div>
+    {% else %}
+    <div id="signinButton">
+      <span class="g-signin"
+            data-scope="openid email"
+            data-clientid="313570040368-tb3390a1v7eesmfrclrog4v4d6njfsr4.apps.googleusercontent.com"
+            data-redirecturi="postmessage"
+            data-accesstype="offline"
+            data-cookiepolicy="single_host_origin"
+            data-callback="signInCallback"
+            data-approvalprompt="force">
+      </span>
+    </div>
+    {% endif %}
+  </div>
+</nav>
+<script>
+function signInCallback(authResult) {
+  if (authResult['code']) {
+    // Hide the sign-in button now that the user is authorized
+    $('#signinButton').attr('style', 'display: none');
+    // Send the one-time-use code to the server, if the server responds, write a 'login successful' message to the web page and then redirect back to the main restaurants page
+    $.ajax({
+      type: 'POST',
+      url: '/gconnect?state={{STATE}}',
+      processData: false,
+      data: authResult['code'],
+      contentType: 'application/octet-stream; charset=utf-8',
+      success: function(result) {
+        // Handle or verify the server response if necessary.
+        window.location.href = "/";
+      }
+    });
+  }
+}
+</script>

@@ -1,11 +1,14 @@
-<html>
-<head>
-</head>
-<body>
-  <h1>Delete '{{ category }}' Category?</h1>
-  <form action="#" method='post'>
-    <input type='submit' value='Delete'>
-  </form>
-  <a href='{{ url_for('showCategoriesAndStuff') }}'>Cancel</a>
-</body>
-</html>
+{% extends "main.html" %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <h1 class="title-header">Delete '{{ category }}' Category?</h1>
+      <form action="#" method='post'>
+        <input type='submit' value='Delete'>
+      </form>
+      <a href='{{ url_for('showCategoriesAndStuff') }}'>Cancel</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
