@@ -1,0 +1,14 @@
+{% extends "main.html" %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <h1 class="title-header">Delete '{{ stuff.name }}'?</h1>
+      <form action="#" method='post'>
+        <p><input type='submit' value='Delete'></p>
+      </form>
+      <p><a href='{{ url_for('showCategoriesAndStuff') }}'>Cancel</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+<section class="flashes">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="flash">
+          <p>
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                {% for message in messages %}
+            <strong> {{ message }} </strong>
+            <br>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
